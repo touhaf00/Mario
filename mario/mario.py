@@ -4,27 +4,20 @@ from config import SCREEN_HEIGHT, GRAVITY
 class Mario(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        # Load and scale the original Mario asset.
         self.original_image = pygame.image.load("assets/mario.png").convert_alpha()
         self.original_image = pygame.transform.scale(self.original_image, (50, 50))
-        # Start with the original (right-facing) image.
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect()
         self.rect.x = 50
         self.rect.y = 300
         self.vel_y = 0
         self.health = 3
-
-
         self.facing = 1
-
-        # Invulnerability attributes
         self.invulnerable = False
         self.invulnerable_timer = 0
 
     def update(self, platform_group):
         keys = pygame.key.get_pressed()
-
         if keys[pygame.K_LEFT]:
             self.rect.x -= 5
             self.facing = -1
@@ -32,20 +25,15 @@ class Mario(pygame.sprite.Sprite):
             self.rect.x += 5
             self.facing = 1
 
-
         if self.facing == -1:
             self.image = pygame.transform.flip(self.original_image, True, False)
         else:
             self.image = self.original_image
 
-        # Apply gravity
         self.vel_y += GRAVITY
         self.rect.y += self.vel_y
-
-        # Check collisions with platforms
         self.handle_collisions(platform_group)
 
-        # Update invulnerability timer if active
         if self.invulnerable:
             self.invulnerable_timer -= 1
             if self.invulnerable_timer <= 0:
@@ -61,6 +49,3 @@ class Mario(pygame.sprite.Sprite):
     def jump(self):
         if self.vel_y == 0:
             self.vel_y = -15
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
