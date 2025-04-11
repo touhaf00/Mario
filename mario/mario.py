@@ -1,20 +1,29 @@
 import pygame
 from config import SCREEN_HEIGHT, GRAVITY
 
+
 class Mario(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, start_pos=(50, 300)):
         super().__init__()
-        self.original_image = pygame.image.load("assets/mario.png").convert_alpha()
-        self.original_image = pygame.transform.scale(self.original_image, (50, 50))
-        self.image = self.original_image.copy()
+        # Load the normal image, scaled to 50x50.
+        self.normal_image = pygame.image.load("assets/mario.png").convert_alpha()
+        self.normal_image = pygame.transform.scale(self.normal_image, (50, 50))
+        # Create a powered-up version (bigger) – adjust size as desired.
+        self.powered_image = pygame.transform.scale(self.normal_image, (75, 75))
+        # Start with the normal image.
+        self.image = self.normal_image.copy()
         self.rect = self.image.get_rect()
-        self.rect.x = 50
-        self.rect.y = 300
+        self.rect.topleft = start_pos
+
         self.vel_y = 0
         self.health = 3
         self.facing = 1
         self.invulnerable = False
         self.invulnerable_timer = 0
+
+        # Power-up attributes: when set, Mario is in "big" mode.
+        self.powered_up = False
+        self.power_up_timer = 0
 
     def update(self, platform_group):
         keys = pygame.key.get_pressed()
@@ -25,20 +34,34 @@ class Mario(pygame.sprite.Sprite):
             self.rect.x += 5
             self.facing = 1
 
-        if self.facing == -1:
-            self.image = pygame.transform.flip(self.original_image, True, False)
+        # Select image based on whether Mario is powered up.
+        if self.powered_up:
+            self.image = self.powered_image
         else:
-            self.image = self.original_image
+            self.image = self.normal_image
 
+        # Flip the image if Mario is facing left.
+        if self.facing == -1:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+        # Apply gravity and update vertical position.
         self.vel_y += GRAVITY
         self.rect.y += self.vel_y
         self.handle_collisions(platform_group)
 
+        # Process temporary invulnerability.
         if self.invulnerable:
             self.invulnerable_timer -= 1
             if self.invulnerable_timer <= 0:
                 self.invulnerable = False
-                print(f"[DEBUG] Mario is no longer invulnerable at position {self.rect.topleft}")
+                print(f"[DEBUG] Mario is no longer invulnerable at {self.rect.topleft}")
+
+        # Process power-up timer.
+        if self.powered_up:
+            self.power_up_timer -= 1
+            if self.power_up_timer <= 0:
+                self.powered_up = False
+                print("[DEBUG] Power-up wore off. Mario reverted to normal.")
 
     def handle_collisions(self, platform_group):
         for platform in platform_group:
@@ -48,4 +71,8 @@ class Mario(pygame.sprite.Sprite):
 
     def jump(self):
         if self.vel_y == 0:
-            self.vel_y = -15
+            # If powered up, jump higher.
+            if self.powered_up:
+                self.vel_y = -20
+            else:
+                self.vel_y = -15

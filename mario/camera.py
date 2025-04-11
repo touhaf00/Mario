@@ -1,14 +1,13 @@
 import pygame
-from config import *
+from config import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Camera:
-    def __init__(self, width, height):
-        self.camera = pygame.Rect(0, 0, width, height)
-        self.world_size = (width, height)
-        self.bounds = (0, 0, width, height)
+    def __init__(self, world_width, world_height):
+        self.camera = pygame.Rect(0, 0, world_width, world_height)
+        self.world_size = (world_width, world_height)
+        self.bounds = (0, 0, world_width, world_height)
 
     def apply(self, entity):
-        """Retourne le rectangle de l'entité ajusté selon la position de la caméra."""
         return entity.rect.move(self.camera.topleft)
 
     def apply_rect(self, rect):
@@ -18,7 +17,7 @@ class Camera:
         x = -target.rect.centerx + int(SCREEN_WIDTH / 2)
         y = -target.rect.centery + int(SCREEN_HEIGHT / 2)
 
-        # Contraindre la caméra aux limites du monde
+        # Clamp so the camera doesn't go outside the world boundaries
         x = min(0, x)
         y = min(0, y)
         x = max(-(self.world_size[0] - SCREEN_WIDTH), x)

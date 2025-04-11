@@ -1,7 +1,7 @@
 import pygame
 
 class Platform(pygame.sprite.Sprite):
-    # Liste statique pour garder la référence de toutes les plateformes
+    # Static list to hold all platform instances, if needed
     all_platforms = []
 
     def __init__(self, x, y, width, height):
@@ -9,8 +9,5 @@ class Platform(pygame.sprite.Sprite):
         self.image = pygame.Surface((width, height))
         self.image.fill((0, 255, 0))
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-        # Ajout de la plateforme à la liste statique
+        self.rect.topleft = (x, y)
         Platform.all_platforms.append(self)
